@@ -32,6 +32,9 @@ def base_opts() -> dict:
         "no_warnings": True,
         "retries": 3,
         "socket_timeout": 30,
+        # cloud IPs are bot-checked on web clients; the tv client serves the
+        # full format list to logged-in sessions without YouTube's PO-token gating
+        "extractor_args": {"youtube": {"player_client": ["tv", "web_safari"]}},
     }
     cf = cookies_file()
     if cf:
@@ -63,10 +66,8 @@ def resolve_source(source: dict) -> Path:
     opts.update(
         {
             "outtmpl": str(work / "%(id)s.%(ext)s"),
-            # cap at 1080p: Shorts are 720x1280, no need for more
-            "format": (
-                "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080][ext=mp4]/bv*+ba/b"
-            ),
+            # relaxed selector: accept any container, re-mux to mp4 afterwards
+            "format": "bv*[height<=1080]+ba/b[height<=1080]/bv*+ba/b",
             "merge_output_format": "mp4",
             "noplaylist": True,
         }

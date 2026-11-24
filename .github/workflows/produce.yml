@@ -53,6 +53,18 @@ jobs:
           key: whisper-models-v1
           restore-keys: whisper-models-
 
+      - name: Write YouTube cookies from secret (fixes YouTube bot-check)
+        env:
+          YT_COOKIES: ${{ secrets.YT_COOKIES }}
+        run: |
+          if [ -n "$YT_COOKIES" ]; then
+            printf '%s\n' "$YT_COOKIES" > /tmp/cookies.txt
+            echo "YT_COOKIES_FILE=/tmp/cookies.txt" >> "$GITHUB_ENV"
+            echo "cookies enabled for yt-dlp"
+          else
+            echo "no YT_COOKIES secret set — YouTube downloads may be bot-checked"
+          fi
+
       - name: Produce clips
         run: |
           COUNT="${{ github.event.inputs.clips }}"

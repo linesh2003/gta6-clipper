@@ -1,0 +1,124 @@
+# ============================================================
+#  GTA 6 Clip Factory — configuration
+#  The two channels below are already wired up. Edit anything,
+#  commit, done. Everything else is automatic.
+# ============================================================
+
+schedule:
+  # Clips produced per run (a run happens every 3 hours + manual button).
+  clips_per_run: 3
+  # At most this many new VODs get processed per run (keeps run time sane).
+  max_vods_per_run: 2
+
+# ------------------------------------------------------------
+# Where clips come from.
+#
+#   type: channel  -> AUTO-FOLLOW a streamer: every new stream they post
+#                     gets clipped once, forever. That is the "unlimited"
+#                     mode — just add more channels below.
+#   type: vod_url  -> clip one specific VOD (Twitch/Kick/YouTube/direct).
+#   type: local_path -> a video file committed to the repo.
+#
+# ⚠️ Only clip streams you own or streamers who allow clipping.
+# ------------------------------------------------------------
+sources:
+  - type: channel
+    url: "https://www.youtube.com/@IShowSpeed/streams"
+    credit: "iShowSpeed"
+    max_new_per_run: 1        # newest unseen streams per run
+    min_vod_minutes: 20       # ignore shorts/highlights
+
+  - type: channel
+    url: "https://www.youtube.com/@CarryisLive/streams"
+    credit: "CarryMinati"
+    max_new_per_run: 1
+    min_vod_minutes: 20
+
+  # More channels — uncomment and add anyone else:
+  # - type: channel
+  #   url: "https://www.youtube.com/@SomeStreamer/streams"
+  #   credit: "SomeStreamer"
+  #   max_new_per_run: 1
+  #   min_vod_minutes: 20
+
+  # One-off VODs (e.g. a Twitch stream):
+  # - type: vod_url
+  #   url: "https://www.twitch.tv/videos/123456789"
+  #   credit: "TwitchStreamer"
+
+# Words that mark hype moments — spoken on stream. Mix GTA 6 chaos words
+# with streamer reaction words; the pipeline also ranks by loudness spikes
+# and talking speed, so screams get found even without keywords.
+keywords:
+  - "insane"
+  - "crazy"
+  - "no way"
+  - "oh my god"
+  - "let's go"
+  - "let him cook"
+  - "wtf"
+  - "what is that"
+  - "police"
+  - "cops"
+  - "wanted"
+  - "busted"
+  - "heist"
+  - "money"
+  - "mission failed"
+  - "crash"
+  - "clutch"
+  - "one hp"
+  - "bruh"
+  - "look at"
+
+style:
+  # Output resolution of the vertical Short (9:16).
+  width: 720
+  height: 1280
+  fps: 30
+  # How landscape footage becomes vertical:
+  #   blur_pad -> full frame centered over a blurred background (best for gameplay)
+  #   center   -> center crop (fills the screen, action must be mid-screen)
+  crop_mode: "blur_pad"
+  # Clip length limits (seconds).
+  min_clip_seconds: 15
+  max_clip_seconds: 45
+  # Big top hook banner duration (seconds). 0 disables.
+  hook_seconds: 2.8
+  # "Anton" (shipped in assets/fonts) is the classic viral-caption font.
+  font: "Anton"
+  font_size: 64
+  # Caption position from the bottom (pixels at 1280 height).
+  caption_margin_bottom: 170
+  # Subtle breathing zoom on the gameplay (true = more dynamic).
+  punch_zoom: true
+  # Keyword-triggered emoji pops (uses the twemoji set in assets/emoji).
+  emoji_pops: true
+  # Caption/hook color scheme: auto (rotates vice/neon/heat/mint/gold)
+  # or one of: vice | neon | heat | mint | gold
+  palette: "auto"
+
+# Whisper model used to transcribe: tiny / base / small / medium.
+# "small" = good accuracy/speed trade-off on free runners; "tiny" = fastest.
+whisper_model: "small"
+
+# ------------------------------------------------------------
+# Ready-to-paste metadata — the bot sends this block under every clip.
+# {hook} = auto-detected moment phrase, {credit} = streamer name.
+# ------------------------------------------------------------
+shorts_metadata:
+  title_template: "{hook} 🤯 #shorts"
+  description_template: >
+    {hook} — {credit} did NOT see this coming 💀
+
+    Which clip should I post next? Comment 👇
+
+    {hashtags}
+  hashtags:
+    - gta6
+    - gtavi
+    - gta6clips
+    - shorts
+    - gaming
+    - viral
+    - funny

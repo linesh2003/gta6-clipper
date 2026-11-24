@@ -1,0 +1,33 @@
+{
+  "seen_vods": {},
+  "vod_failures": {},
+  "clips": [
+    {
+      "id": "c20261123-094421-bro-let-s-go-we-got-0",
+      "run_id": "local",
+      "created": "c20261123-094421",
+      "hook": "BRO. LET'S GO, WE GOT",
+      "title": "BRO. LET'S GO, WE GOT 🤯 #shorts",
+      "credit": "local",
+      "source": "work/test_vod.mp4"
+    },
+    {
+      "id": "c20261123-095025-bro-let-s-go-we-got-0",
+      "run_id": "local",
+      "created": "c20261123-095025",
+      "hook": "BRO. LET'S GO, WE GOT",
+      "title": "BRO. LET'S GO, WE GOT 🤯 #shorts",
+      "credit": "local",
+      "source": "work/test_vod.mp4"
+    },
+    {
+      "id": "c20261123-095243-bro-let-s-go-we-got-0",
+      "run_id": "local",
+      "created": "c20261123-095243",
+      "hook": "BRO. LET'S GO, WE GOT",
+      "title": "BRO. LET'S GO, WE GOT 🤯 #shorts",
+      "credit": "local",
+      "source": "work/test_vod.mp4"
+    }
+  ]
+}

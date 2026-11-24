@@ -1,5 +1,8 @@
 {
   "seen_vods": {},
-  "vod_failures": {},
+  "vod_failures": {
+    "izXcd-bU72k": 1,
+    "ipZCIW7DNJo": 1
+  },
   "clips": []
 }

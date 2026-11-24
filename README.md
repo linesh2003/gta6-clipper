@@ -78,7 +78,26 @@ secret** — add both:
 | `TELEGRAM_BOT_TOKEN` | the token from Part 2 |
 | `TELEGRAM_CHAT_ID` | the number from Part 2 |
 
-No spaces around the values. That's all the secrets there are.
+No spaces around the values.
+
+### Part 3b — YouTube cookies (one-time, fixes "Sign in to confirm you're not a bot")
+
+YouTube blocks video downloads from cloud servers (GitHub Actions) unless the
+downloader is logged in. The factory uses a `YT_COOKIES` secret for this:
+
+1. On your computer, log in to **youtube.com** in Chrome/Edge/Firefox.
+2. Install a cookies-export extension ("Get cookies.txt LOCALLY" for
+   Chrome/Edge, "cookies.txt" for Firefox), open youtube.com, click the
+   extension → **Export** → you get a `cookies.txt` file (Netscape format).
+3. Open `cookies.txt` in Notepad → **Ctrl+A → Ctrl+C** (the whole file).
+4. GitHub repo → **Settings** → **Secrets and variables → Actions** →
+   **New repository secret** → Name: `YT_COOKIES` → paste the file contents →
+   **Add secret**.
+
+Privacy note: these cookies let GitHub Actions download videos as your YouTube
+account (read-only, public videos only). Use a secondary Google account if you
+prefer, and never share the file — it is account access. Without this secret,
+clipping still works whenever YouTube allows it; with it, bot-checks stop.
 
 ### Part 4 — First run
 

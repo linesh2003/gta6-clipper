@@ -21,19 +21,22 @@ from .utils import log
 def latest_vods(channel_url: str, max_items: int = 6) -> list[dict]:
     """Most recent VODs on a channel (flat, fast — no downloads).
 
-    Returns [{id, url, title, duration}] newest first.
+    Returns [{id, url, title, duration}] newest first. Upcoming (scheduled)
+    and currently-live streams are skipped — they get clipped on a later run
+    once they have finished.
     """
     import yt_dlp
 
-    opts = {
-        "quiet": True,
-        "no_warnings": True,
-        "extract_flat": "in_playlist",
-        "playlist_items": f"1:{max_items}",
-        "skip_download": True,
-        "socket_timeout": 30,
-        "retries": 3,
-    }
+    from .download import base_opts
+
+    opts = base_opts()
+    opts.update(
+        {
+            "extract_flat": "in_playlist",
+            "playlist_items": f"1:{max_items}",
+            "skip_download": True,
+        }
+    )
     with yt_dlp.YoutubeDL(opts) as ydl:
         info = ydl.extract_info(channel_url, download=False)
 
@@ -42,6 +45,8 @@ def latest_vods(channel_url: str, max_items: int = 6) -> list[dict]:
     for e in entries:
         if not e or not e.get("id"):
             continue
+        if e.get("live_status") in ("is_live", "is_upcoming"):
+            continue  # scheduled or still running — nothing finished to clip
         url = e.get("url") or e.get("webpage_url") or ""
         if not url.startswith("http"):
             url = f"https://www.youtube.com/watch?v={e['id']}"

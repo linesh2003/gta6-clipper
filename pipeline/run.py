@@ -13,7 +13,7 @@ from pathlib import Path
 
 from . import discover, moments, state as state_mod, telegram
 from .config import Config, drafts_dir, work_dir
-from .download import prepare
+from .download import is_deferrable_error, prepare
 from .render import probe_ok, render_moment
 from .utils import ffprobe_duration, log, setup_logging, slugify
 
@@ -30,7 +30,11 @@ def cmd_produce(
     if local_file:
         sources = [{"type": "local_path", "path": local_file, "credit": "local"}]
     else:
-        sources = discover.discover_sources(cfg, state)
+        sources = []
+        try:
+            sources = discover.discover_sources(cfg, state)
+        except Exception as exc:
+            log.error("channel discovery crashed (%s) — skipping this round", exc)
         if len(sources) > cfg.max_vods_per_run:
             sources = sources[: cfg.max_vods_per_run]
     if not sources:
@@ -49,7 +53,14 @@ def cmd_produce(
             video, audio = prepare(src)
         except Exception as exc:
             log.error("source failed (%s): %s", src.get("url", src.get("path")), exc)
-            if vod_id:
+            if vod_id and is_deferrable_error(exc):
+                log.warning(
+                    "vod %s deferred (scheduled stream or YouTube bot-check) — "
+                    "no retry burned, next run will try again. If bot-checks keep "
+                    "happening, add the YT_COOKIES secret (see README, Cookies)",
+                    vod_id,
+                )
+            elif vod_id:
                 if state_mod.mark_failure(state, vod_id) >= 3:
                     state_mod.mark_seen(state, vod_id)
                     log.warning("giving up on vod %s after 3 failures", vod_id)

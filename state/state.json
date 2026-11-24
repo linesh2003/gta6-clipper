@@ -1,9 +1,6 @@
 {
   "seen_vods": {},
-  "vod_failures": {
-    "91c96JtcIFg": 2,
-    "ipZCIW7DNJo": 2
-  },
+  "vod_failures": {},
   "clips": [
     {
       "id": "c20261123-094421-bro-let-s-go-we-got-0",

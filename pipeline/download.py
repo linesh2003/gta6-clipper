@@ -1,10 +1,47 @@
 """Source resolution: local files or yt-dlp downloads (Twitch/Kick/YouTube/direct)."""
+import os
 from pathlib import Path
 
 import yt_dlp
 
 from .config import work_dir
 from .utils import extract_audio, log
+
+# Error fragments that mean "not the video's fault — try again later" rather
+# than "this video is dead". Deferred VODs do not burn their retry counter.
+DEFER_PATTERNS = (
+    "live event will begin",  # scheduled / upcoming stream — nothing to clip yet
+    "sign in to confirm",     # YouTube bot-check — needs cookies (see README)
+    "is not available",       # transient YouTube availability hiccups
+    "upcoming",
+)
+
+
+def cookies_file() -> str | None:
+    """Path to a Netscape cookies.txt given via YT_COOKIES_FILE (if it exists)."""
+    p = os.environ.get("YT_COOKIES_FILE", "")
+    return p if p and Path(p).exists() else None
+
+
+def base_opts() -> dict:
+    """yt-dlp options shared by discovery and download (incl. cookies when set)."""
+    opts = {
+        "quiet": True,
+        "no_warnings": True,
+        "retries": 3,
+        "socket_timeout": 30,
+    }
+    cf = cookies_file()
+    if cf:
+        opts["cookiefile"] = cf
+        log.info("using YouTube cookies from %s", cf)
+    return opts
+
+
+def is_deferrable_error(exc: Exception) -> bool:
+    """True = video not ready yet / YouTube wants a login — retry next run, free."""
+    text = str(exc).lower()
+    return any(p in text for p in DEFER_PATTERNS)
 
 
 def resolve_source(source: dict) -> Path:
@@ -20,18 +57,18 @@ def resolve_source(source: dict) -> Path:
 
     url = source["url"]
     work = work_dir()
-    outtmpl = str(work / "%(id)s.%(ext)s")
-    opts = {
-        "outtmpl": outtmpl,
-        # cap at 1080p: Shorts are 720x1280, no need for more
-        "format": "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080][ext=mp4]/bv*+ba/b",
-        "merge_output_format": "mp4",
-        "noplaylist": True,
-        "quiet": True,
-        "no_warnings": True,
-        "retries": 3,
-        "socket_timeout": 30,
-    }
+    opts = base_opts()
+    opts.update(
+        {
+            "outtmpl": str(work / "%(id)s.%(ext)s"),
+            # cap at 1080p: Shorts are 720x1280, no need for more
+            "format": (
+                "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080][ext=mp4]/bv*+ba/b"
+            ),
+            "merge_output_format": "mp4",
+            "noplaylist": True,
+        }
+    )
     log.info("downloading %s", url)
     with yt_dlp.YoutubeDL(opts) as ydl:
         info = ydl.extract_info(url, download=True)

@@ -14,6 +14,7 @@ DEFER_PATTERNS = (
     "sign in to confirm",     # YouTube bot-check — needs cookies (see README)
     "video unavailable",      # usually a false 'unavailable' for stale cookies / flagged IP
     "content isn't available",  # same false message, other wording
+    "needs to be reloaded",   # YouTube gate when the JS challenge layer is missing
     "is not available",       # transient YouTube availability hiccups
     "upcoming",
 )
@@ -26,15 +27,16 @@ def cookies_file() -> str | None:
 
 
 def base_opts() -> dict:
-    """yt-dlp options shared by discovery and download (incl. cookies when set)."""
+    """yt-dlp options shared by discovery and download (incl. cookies when set).
+
+    No player_client override: yt-dlp's maintained defaults + the EJS challenge
+    solver (Deno, installed by the workflow) pick the right clients themselves.
+    """
     opts = {
         "quiet": True,
         "no_warnings": True,
         "retries": 3,
         "socket_timeout": 30,
-        # cloud IPs are bot-checked on web clients; the tv client serves the
-        # full format list to logged-in sessions without YouTube's PO-token gating
-        "extractor_args": {"youtube": {"player_client": ["tv", "web_safari"]}},
     }
     cf = cookies_file()
     if cf:

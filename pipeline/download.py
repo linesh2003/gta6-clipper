@@ -12,6 +12,8 @@ from .utils import extract_audio, log
 DEFER_PATTERNS = (
     "live event will begin",  # scheduled / upcoming stream — nothing to clip yet
     "sign in to confirm",     # YouTube bot-check — needs cookies (see README)
+    "video unavailable",      # usually a false 'unavailable' for stale cookies / flagged IP
+    "content isn't available",  # same false message, other wording
     "is not available",       # transient YouTube availability hiccups
     "upcoming",
 )
